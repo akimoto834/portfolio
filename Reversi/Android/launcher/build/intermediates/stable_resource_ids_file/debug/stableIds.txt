@@ -1,0 +1,16 @@
+com.DefaultCompany.Reversi:style/UnityThemeSelector = 0x7f050001
+com.DefaultCompany.Reversi:style/BaseUnityTheme = 0x7f050000
+com.DefaultCompany.Reversi:string/game_view_content_description = 0x7f040006
+com.DefaultCompany.Reversi:mipmap/app_icon_round = 0x7f030001
+com.DefaultCompany.Reversi:string/FreeformWindowSize_tablet = 0x7f040004
+com.DefaultCompany.Reversi:string/FreeformWindowOrientation_portrait = 0x7f040001
+com.DefaultCompany.Reversi:mipmap/ic_launcher_foreground = 0x7f030003
+com.DefaultCompany.Reversi:string/app_name = 0x7f040005
+com.DefaultCompany.Reversi:mipmap/app_icon = 0x7f030000
+com.DefaultCompany.Reversi:mipmap/ic_launcher_background = 0x7f030002
+com.DefaultCompany.Reversi:style/UnityThemeSelector.Translucent = 0x7f050002
+com.DefaultCompany.Reversi:string/FreeformWindowOrientation_landscape = 0x7f040000
+com.DefaultCompany.Reversi:color/staticSplashScreenBackgroundColor = 0x7f010000
+com.DefaultCompany.Reversi:string/FreeformWindowSize_phone = 0x7f040003
+com.DefaultCompany.Reversi:string/FreeformWindowSize_maximize = 0x7f040002
+com.DefaultCompany.Reversi:id/unitySurfaceView = 0x7f020000

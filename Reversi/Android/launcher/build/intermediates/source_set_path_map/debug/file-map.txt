@@ -1,0 +1,9 @@
+com.DefaultCompany.Reversi.launcher-pngs-0 C:\Unity\Reversi2\Reversi\Android\launcher\build\generated\res\pngs\debug
+com.DefaultCompany.Reversi.launcher-resValues-1 C:\Unity\Reversi2\Reversi\Android\launcher\build\generated\res\resValues\debug
+com.DefaultCompany.Reversi.launcher-rs-2 C:\Unity\Reversi2\Reversi\Android\launcher\build\generated\res\rs\debug
+com.DefaultCompany.Reversi.launcher-mergeDebugResources-3 C:\Unity\Reversi2\Reversi\Android\launcher\build\intermediates\incremental\debug\mergeDebugResources\merged.dir
+com.DefaultCompany.Reversi.launcher-mergeDebugResources-4 C:\Unity\Reversi2\Reversi\Android\launcher\build\intermediates\incremental\debug\mergeDebugResources\stripped.dir
+com.DefaultCompany.Reversi.launcher-merged_res-5 C:\Unity\Reversi2\Reversi\Android\launcher\build\intermediates\merged_res\debug
+com.DefaultCompany.Reversi.launcher-debug-6 C:\Unity\Reversi2\Reversi\Android\launcher\src\debug\res
+com.DefaultCompany.Reversi.launcher-main-7 C:\Unity\Reversi2\Reversi\Android\launcher\src\main\res
+com.DefaultCompany.Reversi.launcher-packaged_res-8 C:\Unity\Reversi2\Reversi\Android\unityLibrary\build\intermediates\packaged_res\debug
