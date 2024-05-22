@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bonfire/bonfire.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:math';
 import 'barChart.dart';
+import 'login.dart';
 import 'player.dart';
 
 
@@ -23,11 +25,7 @@ class Walk extends ConsumerWidget {
     fetchPlayerData(ref);//プレイヤーデータの取得
 
     return MaterialApp(
-      title: 'ゲームマップ',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      title: '歩数',
       home: WalkMainPage(),
 
     );
@@ -82,13 +80,31 @@ class WalkState extends ConsumerState<WalkMainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("現在の歩数"), //
+          backgroundColor: Colors.orange,
+          title: Text("現在の歩数"),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () async {
+                // ログアウト処理
+                // 内部で保持しているログイン情報等が初期化される
+                // （現時点ではログアウト時はこの処理を呼び出せばOKと、思うぐらいで大丈夫です）
+                await FirebaseAuth.instance.signOut();
+                // ログイン画面に遷移＋チャット画面を破棄
+                await Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) {
+                    return LoginPage();
+                  }),
+                );
+              },
+            ),
+          ],
         ),
          body: SingleChildScrollView(
              child:Center(
                 child: Column(
                  children: <Widget>[
+                   Text("目標歩数:${ref.watch(walkGoalProvider)}歩"),
                    BatteryLevelIndicator(),
                    BarChartWidget()
 
@@ -100,12 +116,10 @@ class WalkState extends ConsumerState<WalkMainPage> {
   }
 }
 
-const kColorPurple = Color(0xFF8337EC);
-const kColorPink = Color(0xFFFF006F);
+const kColorPurple = Colors.orangeAccent;
+const kColorPink = Colors.redAccent;
 const kColorIndicatorBegin = kColorPink;
 const kColorIndicatorEnd = kColorPurple;
-const kColorTitle = Color(0xFF616161);
-const kColorText = Color(0xFF9E9E9E);
 const kElevation = 4.0;
 
 class _BatteryLevelIndicatorPainter extends CustomPainter {
@@ -184,10 +198,10 @@ class BatteryLevelIndicator extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Text("${ref.watch(walkCurrentProvider)}歩",
-                      style: TextStyle(color: kColorPink, fontSize: 30)),
+                      style: TextStyle(color: Colors.blueGrey, fontSize: 30)),
                   Text(
                     '${double.parse((percentage * 100).toStringAsFixed(1))}%',//小数第一位まで
-                    style: TextStyle(color: kColorPink, fontSize: 25),
+                    style: TextStyle(color: Colors.blueGrey, fontSize: 25),
                   ),
                 ]
 

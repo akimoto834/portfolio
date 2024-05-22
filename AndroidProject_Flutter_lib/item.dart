@@ -1,10 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:project/gamemainstreamzip.dart';
 import 'package:project/player.dart';
 import 'game_data_load.dart';
+import 'login.dart';
+import 'movePlayerSelect.dart';
+import 'node.dart';
 
 
 class ItemPage extends ConsumerWidget {
@@ -14,8 +19,25 @@ class ItemPage extends ConsumerWidget {
     fetchPlayerData(ref);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Item Page!"),
+        backgroundColor: Colors.orange,
+        title: Text("アイテム一覧"),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              // ログアウト処理
+              // 内部で保持しているログイン情報等が初期化される
+              // （現時点ではログアウト時はこの処理を呼び出せばOKと、思うぐらいで大丈夫です）
+              await FirebaseAuth.instance.signOut();
+              // ログイン画面に遷移＋チャット画面を破棄
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) {
+                  return LoginPage();
+                }),
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
           child: Column(
@@ -34,14 +56,14 @@ class ItemPage extends ConsumerWidget {
                       scrollbarOrientation: ScrollbarOrientation.right,
                       child:ListView(
                         children: [
-                          _menuItem(ref, l, 1, Icon(Icons.security)),
-                          _menuItem(ref, l, 2, Icon(Icons.access_alarm)),
-                          _menuItem(ref, l, 3, Icon(Icons.account_balance)),
-                          _menuItem(ref, l, 4, Icon(Icons.account_balance)),
-                          _menuItem(ref, l, 5, Icon(Icons.account_balance)),
-                          _menuItem(ref, l, 6, Icon(Icons.account_balance)),
-                          _menuItem(ref, l, 7, Icon(Icons.account_balance)),
-                          _menuItem(ref, l, 8, Icon(Icons.account_balance)),
+                          _menuItem(context, ref, l, 1, Icon(Icons.accessible_forward_rounded)),
+                          _menuItem(context, ref, l, 2, Icon(Icons.account_balance)),
+                          _menuItem(context, ref, l, 3, Icon(Icons.account_balance)),
+                          _menuItem(context, ref, l, 4, Icon(Icons.account_balance)),
+                          _menuItem(context, ref, l, 5, Icon(Icons.account_balance)),
+                          _menuItem(context, ref, l, 6, Icon(Icons.account_balance)),
+                          _menuItem(context, ref, l, 7, Icon(Icons.account_balance)),
+                          _menuItem(context, ref, l, 8, Icon(Icons.account_balance)),
                         ],
                       )
                   )
@@ -65,11 +87,13 @@ List<P> buy(int playerID, List<P> l, int price){
   return [...l];//スプレッド演算子を使うとうまくいく　新たなリストが作られる
 }
 */
-void buy(int playerID, List<P> l, int price){
+void buy(WidgetRef ref, int playerID, List<P> l, int price){
   l[playerID].usedpoint += price;
+  var point = ref.watch(playerPointProvider);
+  ref.watch(playerPointProvider.notifier).state = point - price;
   GameDataLoad.saveDocuments(
       collectionPath: "test1",
-      gameID: "1",
+      gameID: ref.read(gameIDProvider),
       dataType: "Players",
       dataList: l,
       toMap: (data) => data.toMap()
@@ -78,19 +102,21 @@ void buy(int playerID, List<P> l, int price){
 
 final menuprice = [1, 2, 3, 4, 5, 6, 7];
 
-Widget _menuItem(WidgetRef ref ,List<P> l, int num, Icon icon) {
+Widget _menuItem(BuildContext context, WidgetRef ref ,List<P> l, int num, Icon icon) {
   return Container(
     decoration: new BoxDecoration(
         border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey))
     ),
     child:ListTile(
       leading: icon,
-      title: Text(
-        "Item"+"$num",
-        style: TextStyle(color:Colors.black, fontSize: 18.0),
-      ),
+      title: num==1 ?
+        Text("瞬間移動: 保持数${ref.watch(playerProvider)[ref.watch(playerIDProvider)].item1}", style: TextStyle(color:Colors.black, fontSize: 18.0)):
+        Text("Coming Soon!", style: TextStyle(color:Colors.black, fontSize: 18.0)),
       onTap: () {
-        buy(ref.watch(playerIDProvider), l, menuprice[num-1]);
+        if(num==1){
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => MovePlayerSelectPage()));
+        }
         // リストの場合は変数のアドレスが変わる（新たにリストが生成される)と変更を通知しwidget更新？　
         //→　~.state=[P(id: 0, point: 0, score: 0),P(id: 1, point: 76, score: 36),P(id: 2, point: 80, score: 2)]とすると更新される
       },

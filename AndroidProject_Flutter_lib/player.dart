@@ -7,9 +7,15 @@ import 'game_data_load.dart';
 
 final player1UsedPointProvider = StateProvider((ref) => 0);
 final player1ScoreProvider = StateProvider((ref) => 0);
+final player1LocProvider = StateProvider((ref) => 0);
+final player1Item1Provider = StateProvider((ref) => 0);
+
 final player2UsedPointProvider = StateProvider((ref) => 0);
 final player2ScoreProvider = StateProvider((ref) => 0);
+final player2LocProvider = StateProvider((ref) => 0);
+final player2Item1Provider = StateProvider((ref) => 0);
 
+var first_login = true;//初めのログインか
 void fetchPlayerData(WidgetRef ref) async {//プレイヤーデータの取得
   try {
     //現在ログインしているユーザー情報を取得
@@ -35,23 +41,34 @@ void fetchPlayerData(WidgetRef ref) async {//プレイヤーデータの取得
     QuerySnapshot querySnapshot = await users.get();
     // 取得したドキュメントを処理
     var i=0;
-    querySnapshot.docs.forEach((doc) {
-      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    if(first_login){
+      querySnapshot.docs.forEach((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-      if(i==1){
-        print('usedpoint: ${data["usedpoint"]}');
-        print('score: ${data["score"]}');
-        ref.watch(player1UsedPointProvider.notifier).state=data["usedpoint"];
-        ref.watch(player1ScoreProvider.notifier).state=data["score"];
-      }
-      if(i==2){
-        print('usedpoint: ${data["usedpoint"]}');
-        print('score: ${data["score"]}');
-        ref.watch(player2UsedPointProvider.notifier).state=data["usedpoint"];
-        ref.watch(player2ScoreProvider.notifier).state=data["score"];
-      }
-      i=i+1;
-    });
+        if(i==1){
+          print('usedpoint: ${data["usedpoint"]}');
+          print('score: ${data["score"]}');
+          ref.watch(player1UsedPointProvider.notifier).state=data["usedpoint"];
+          ref.watch(player1ScoreProvider.notifier).state=data["score"];
+          ref.watch(player1LocProvider.notifier).state=data["loc"];
+          ref.watch(player1Item1Provider.notifier).state=data["item1"];
+
+        }
+        if(i==2){
+          print('usedpoint: ${data["usedpoint"]}');
+          print('score: ${data["score"]}');
+          ref.watch(player2UsedPointProvider.notifier).state=data["usedpoint"];
+          ref.watch(player2ScoreProvider.notifier).state=data["score"];
+          ref.watch(player2LocProvider.notifier).state=data["loc"];
+          ref.watch(player2Item1Provider.notifier).state=data["item1"];
+
+          //ここでplayerprovider更新する
+        }
+        i=i+1;
+      });
+      first_login = false;
+    }
+
   } catch (e) {
     print('エラー: $e');
   }
@@ -59,9 +76,9 @@ void fetchPlayerData(WidgetRef ref) async {//プレイヤーデータの取得
 
 //pointとscore引き継げるがwalk.dartの画面から速くゲーム画面に遷移するとproviderの読み取りの方が速く0が代入される
 final playerProvider = StateProvider((ref) =>
-[P(id: 0, usedpoint: 0, score: 0, color: Colors.green),
-  P(id: 1, usedpoint: ref.watch(player1UsedPointProvider), score: ref.watch(player1ScoreProvider), color: Colors.blue),
-  P(id: 2, usedpoint: ref.watch(player2UsedPointProvider), score: ref.watch(player2ScoreProvider), color: Colors.red)]);
+[P(id: 0, usedpoint: 0, score: 0, color: Colors.brown, loc: -1, item1: 0),
+  P(id: 1, usedpoint: ref.watch(player1UsedPointProvider), score: ref.watch(player1ScoreProvider), color: Colors.red, loc: ref.watch(player1LocProvider), item1: ref.watch(player1Item1Provider)),
+  P(id: 2, usedpoint: ref.watch(player2UsedPointProvider), score: ref.watch(player2ScoreProvider), color: Colors.green, loc:  ref.watch(player2LocProvider),  item1: ref.watch(player2Item1Provider))]);
 final playerIDProvider = StateProvider((ref) => 1);
 
 final playerPointProvider = StateProvider((ref) => ref.watch(walkCurrentProvider)-(ref.watch(playerProvider)[ref.watch(playerIDProvider)].usedpoint));
@@ -71,7 +88,9 @@ class P {
   int usedpoint;//使用ポイント
   int score;//保有スコア
   final Color color;
-  P({required this.id, required this.usedpoint, required this.score, required this.color});
+  int loc;
+  int item1;
+  P({required this.id, required this.usedpoint, required this.score, required this.color, required this.loc, required this.item1});
 
   // PオブジェクトをMapに変換するメソッド
   Map<String, dynamic> toMap() {
@@ -80,6 +99,8 @@ class P {
       'usedpoint': usedpoint,
       'score': score,
       'color': color.value,
+      'loc' : loc,
+      'item1': item1
     };
   }
 
@@ -90,6 +111,8 @@ class P {
       usedpoint: map['usedpoint'],
       score: map['score'],
       color: Color(map['color']),
+      loc: map['loc'],
+      item1: map['item1']
     );
   }
 }

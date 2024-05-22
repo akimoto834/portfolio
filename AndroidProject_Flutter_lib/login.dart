@@ -47,7 +47,7 @@ class ChatApp extends StatelessWidget {
         title: 'Login',
         theme: ThemeData(
           // テーマカラー
-          primarySwatch: Colors.blue,
+          primarySwatch: Colors.orange,
         ),
         // ログイン画面を表示
         home: LoginPage(),
@@ -75,126 +75,130 @@ class _LoginPageState extends State<LoginPage> {
     final UserState userState = Provider.of<UserState>(context);
 
     return Scaffold(
-      body: Center(
-        child: Container(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // メールアドレス入力
-              TextFormField(
-                decoration: InputDecoration(labelText: 'メールアドレス'),
-                onChanged: (String value) {
-                  setState(() {
-                    email = value;
-                  });
-                },
-              ),
-              // パスワード入力
-              TextFormField(
-                decoration: InputDecoration(labelText: 'パスワード'),
-                obscureText: true,
-                onChanged: (String value) {
-                  setState(() {
-                    password = value;
-                  });
-                },
-              ),
-              Container(
-                padding: EdgeInsets.all(8),
-                // メッセージ表示
-                child: Text(infoText),
-              ),
-              Container(
-                width: double.infinity,
-                // ユーザー登録ボタン
-                child: ElevatedButton(
-                  child: Text('ユーザー登録'),
-                  onPressed: () async {
-                    try {
-                      // メール/パスワードでユーザー登録
-                      final FirebaseAuth auth = FirebaseAuth.instance;
-                      final result = await auth.createUserWithEmailAndPassword(
-                        email: email,
-                        password: password,
-                      );
-                      // ユーザー情報を更新
-                      DocumentSnapshot adminDoc = await FirebaseFirestore.instance.collection("Admin").doc("usersData").get();
-                      Map<String, dynamic> adminData = adminDoc.data() as Map<String, dynamic>;
-                      int userNum = adminData["number"];
-                      int gameNum = adminData["gameNumber"];
-                      userNum++;
-
-                      //新規プレイヤーが奇数番目ならゲームを一つ増やす
-                      if(userNum%2 == 1){
-                        gameNum++;
-                      }
-
-                      await FirebaseFirestore.instance.collection("Users").doc(result.user!.uid).set({
-                        "id": result.user!.uid,
-                        "email": result.user!.email,
-                        "gameID": gameNum.toString(),
-                        "playerID":2 - (userNum % 2) //偶数番目がPlayer2になるようにする
-                        // 他のユーザー情報をここに追加する
-                      });
-                      await FirebaseFirestore.instance.collection("Admin").doc("usersData").set({
-                        "number": userNum,
-                        "gameNumber":gameNum
-                      });
-
-                      userState.setUser(result.user!);
-                      // ユーザー登録に成功した場合
-                      // チャット画面に遷移＋ログイン画面を破棄
-                      await Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) {
-                          return MyApp();
-                        }),
-                      );
-                    } catch (e) {
-                      // ユーザー登録に失敗した場合
+          body:
+          SingleChildScrollView(
+           child:Center(
+            child: Container(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(height: 50),
+                  // メールアドレス入力
+                  TextFormField(
+                    decoration: InputDecoration(labelText: 'メールアドレス'),
+                    onChanged: (String value) {
                       setState(() {
-                        infoText = "登録に失敗しました：${e.toString()}";
+                        email = value;
                       });
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                // ログイン登録ボタン
-                child: OutlinedButton(
-                  child: Text('ログイン'),
-                  onPressed: () async {
-                    try {
-                      // メール/パスワードでログイン
-                      final FirebaseAuth auth = FirebaseAuth.instance;
-                      final result = await auth.signInWithEmailAndPassword(
-                        email: email,
-                        password: password,
-                      );
-                      // ユーザー情報を更新
-                      userState.setUser(result.user!);
-                      // ログインに成功した場合
-                      // チャット画面に遷移＋ログイン画面を破棄
-                      await Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) {
-                          return MyApp();
-                        }),
-                      );
-                    } catch (e) {
-                      // ログインに失敗した場合
+                    },
+                  ),
+                  // パスワード入力
+                  TextFormField(
+                    decoration: InputDecoration(labelText: 'パスワード'),
+                    obscureText: true,
+                    onChanged: (String value) {
                       setState(() {
-                        infoText = "ログインに失敗しました：${e.toString()}";
+                        password = value;
                       });
-                    }
-                  },
-                ),
+                    },
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    // メッセージ表示
+                    child: Text(infoText),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    // ユーザー登録ボタン
+                    child: ElevatedButton(
+                      child: Text('ユーザー登録'),
+                      onPressed: () async {
+                        try {
+                          // メール/パスワードでユーザー登録
+                          final FirebaseAuth auth = FirebaseAuth.instance;
+                          final result = await auth.createUserWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+                          // ユーザー情報を更新
+                          DocumentSnapshot adminDoc = await FirebaseFirestore.instance.collection("Admin").doc("usersData").get();
+                          Map<String, dynamic> adminData = adminDoc.data() as Map<String, dynamic>;
+                          int userNum = adminData["number"];
+                          int gameNum = adminData["gameNumber"];
+                          userNum++;
+
+                          //新規プレイヤーが奇数番目ならゲームを一つ増やす
+                          if(userNum%2 == 1){
+                            gameNum++;
+                          }
+
+                          await FirebaseFirestore.instance.collection("Users").doc(result.user!.uid).set({
+                            "id": result.user!.uid,
+                            "email": result.user!.email,
+                            "gameID": gameNum.toString(),
+                            "playerID":2 - (userNum % 2) //偶数番目がPlayer2になるようにする
+                            // 他のユーザー情報をここに追加する
+                          });
+                          await FirebaseFirestore.instance.collection("Admin").doc("usersData").set({
+                            "number": userNum,
+                            "gameNumber":gameNum
+                          });
+
+                          userState.setUser(result.user!);
+                          // ユーザー登録に成功した場合
+                          // チャット画面に遷移＋ログイン画面を破棄
+                          await Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) {
+                              return MyApp();
+                            }),
+                          );
+                        } catch (e) {
+                          // ユーザー登録に失敗した場合
+                          setState(() {
+                            infoText = "登録に失敗しました：${e.toString()}";
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    // ログイン登録ボタン
+                    child: OutlinedButton(
+                      child: Text('ログイン'),
+                      onPressed: () async {
+                        try {
+                          // メール/パスワードでログイン
+                          final FirebaseAuth auth = FirebaseAuth.instance;
+                          final result = await auth.signInWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+                          // ユーザー情報を更新
+                          userState.setUser(result.user!);
+                          // ログインに成功した場合
+                          // チャット画面に遷移＋ログイン画面を破棄
+                          await Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) {
+                              return MyApp();
+                            }),
+                          );
+                        } catch (e) {
+                          // ログインに失敗した場合
+                          setState(() {
+                            infoText = "ログインに失敗しました：${e.toString()}";
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+       ),
     );
   }
 }

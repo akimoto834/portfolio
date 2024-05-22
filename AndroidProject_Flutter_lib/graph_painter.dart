@@ -40,7 +40,7 @@ class EdgePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const int graphScale = 30; //グラフの座標を何倍して表示するか 同時にnodeWidgetクラスも変更する
+    const int graphScale = 70; //グラフの座標を何倍して表示するか 同時にnodeWidgetクラスも変更する
     const Offset origin = Offset(50, 50); //グラフの表示の下限
 
     // エッジを描画
