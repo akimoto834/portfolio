@@ -1,0 +1,1 @@
+declare type Sort = "old" | "new" | "old_story" | "new_story" | "good" | "recommend"

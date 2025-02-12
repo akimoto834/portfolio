@@ -1,0 +1,19 @@
+<libraries>
+  <library
+      name="C:\Unity\Reversi2\Reversi\Library\Bee\Android\Prj\Mono2x\Gradle@@:unityLibrary::release"
+      jars="C:\Unity\Reversi2\Reversi\Library\Bee\Android\Prj\Mono2x\Gradle\unityLibrary\build\.transforms\c5966a3435ad0f18cce670155bf174c7\transformed\out\jars\classes.jar;C:\Unity\Reversi2\Reversi\Library\Bee\Android\Prj\Mono2x\Gradle\unityLibrary\build\.transforms\c5966a3435ad0f18cce670155bf174c7\transformed\out\jars\libs\unity-classes.jar"
+      resolved="Gradle:unityLibrary:unspecified"
+      folder="C:\Unity\Reversi2\Reversi\Library\Bee\Android\Prj\Mono2x\Gradle\unityLibrary\build\.transforms\c5966a3435ad0f18cce670155bf174c7\transformed\out"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="__local_aars__:C:\Unity\Reversi2\Reversi\Library\Bee\Android\Prj\Mono2x\Gradle\unityLibrary\libs\unity-classes.jar:unspecified@jar"
+      jars="C:\Unity\Reversi2\Reversi\Library\Bee\Android\Prj\Mono2x\Gradle\unityLibrary\libs\unity-classes.jar"
+      resolved="__local_aars__:C:\Unity\Reversi2\Reversi\Library\Bee\Android\Prj\Mono2x\Gradle\unityLibrary\libs\unity-classes.jar:unspecified"/>
+</libraries>

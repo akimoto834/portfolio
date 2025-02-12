@@ -1,0 +1,476 @@
+import objectdraw.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class play extends WindowController  {
+    private FilledRect background;
+    private character runner;
+    private int n = 0;
+    @Override public void begin(){
+        
+        background=new FilledRect(0, 0, 10000, 10000, canvas);
+        background.setColor(Color.cyan);
+        new Text("Set the size of canvas to appropriate size", 0, 0, canvas);
+        new Text("Don't change canvas while playing game", 0, 40, canvas); 
+        new Text("Please run for a long time as long as you can", 0, 60, canvas);
+        new Text("Barrier's speed is increased per 20 second", 0, 80, canvas);
+        new Text("Click canvas to start the game", 0, 120, canvas);
+    }
+    
+    @Override public void onMouseClick(Location point){
+       if(n==1){
+         runner.Jump();
+      }
+       if(n==0){
+        canvas.clear();
+        background=new FilledRect(0, 0, canvas.getWidth(), canvas.getHeight(), canvas);
+        background.setColor(Color.cyan);
+        runner = new character(canvas);
+        new movestage(runner, canvas);
+        n++;
+      }
+       
+   } 
+}
+
+import objectdraw.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class barrierBlock extends ActiveObject {
+    private DrawingCanvas canvas;
+    private FilledRect[] block;
+    private FramedRect[] frameblock;
+    private int kind;
+    private int time=33;
+    private character runner;
+    private int num2=0;
+    private int num3=0;
+    private double velocity;
+    public barrierBlock  (character Runner, int X, int Y, int Kind, double Velocity,DrawingCanvas aCanvas){
+        canvas=aCanvas;
+        runner=Runner;
+        kind=Kind;
+        block=new FilledRect[3];
+        frameblock=new FramedRect[3];
+        velocity=Velocity;
+        for(int num=0; num<kind; num++){
+            block[num] = new FilledRect( X, Y, 20, 20, canvas);
+            block[num].setColor(new Color(165,42,42));
+            frameblock[num] = new FramedRect( X, Y, 20, 20, canvas);
+            frameblock[num].setColor(Color.YELLOW);
+            X=X+20;
+        }
+        start();
+       }
+      
+    @Override public void run(){
+       while( true ){
+           for(int num=0; num<kind; num++){//ブロックの移動と下からの衝突
+               block[num].move( -2-velocity, 0);
+               frameblock[num].move(-2-velocity,0);
+           }
+               
+             
+           if(runner.getLeftX()<block[kind-1].getX()+20
+                     && runner.getRightX()>block[0].getX() ){//ブロックの幅内に入った時
+              if(runner.getUpY()>block[0].getY()+10){//ブロックの下にいるとき
+                   while(num3==0){
+                     for(int num=0; num<kind; num++){//ブロックが止まらないように
+                        block[num].move( -2-velocity, 0);
+                        frameblock[num].move(-2-velocity,0);
+                     }
+                     if(runner.getLeftX()>block[kind-1].getX()+20){//ブロックの下を抜けるとwhileから抜ける
+                         num3=1;
+                     }
+                     if(runner.getUpY()<block[0].getY()+20){//下からの衝突
+                       runner.reflect();  //上ジャンプの中止
+                     }
+                     pause(time);
+                  }
+                  num3=0;
+              }
+               
+              if(runner.getDownY()<block[0].getY()){//一回ブロックの上に行ったかどうか
+                   while(num2==0){
+                     for(int num=0; num<kind; num++){//ブロックが止まらないように
+                        block[num].move( -2-velocity, 0);
+                        frameblock[num].move(-2-velocity,0);
+                     }
+                     if(runner.getDownY()>block[0].getY() && runner.getLeftX()<block[kind-1].getX()+20){//上からの衝突     
+                       runner.stopJump();//ジャンプ中断
+                       runner.moveTo(block[0].getY() );//調整
+                       runner.On();//上に乗った
+                       num2=1;//whileから抜ける
+                     } 
+                     
+                     pause(time);
+                   }
+                  
+              }
+              
+           }
+            
+           if( runner.getDownY()+10 < block[0].getY() ){//ブロック上でジャンプしたときにonTheBlockをfalseに
+               runner.notOn();
+               num2=0;
+            }
+            
+           if(num2==1 && block[kind-1].getX()+20 < runner.getLeftX()){//端に来た時に落ちる 
+                  runner.falling();//落ちる
+                  runner.notOn();//ブロックに乗ってない
+                  num2=0;
+            }
+           
+            pause(time);
+        }
+     }
+     
+     public double getRightX(){
+         return block[kind-1].getX()+20;
+      }
+     public void upSpeed(){
+          velocity+=0.1;
+     }
+     public double speed(){
+         return velocity;
+        }
+}
+
+import objectdraw.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class Fire extends ActiveObject {
+    private FilledOval fire;
+    private DrawingCanvas canvas;
+    private int time=33;
+    private character runner;
+    private double cx, cy;//火球の中心
+    private double velocity=0;
+    private boolean moving=true;
+    public Fire( character me, double x, double y, double Velocity, DrawingCanvas aCanvas){
+        runner=me;
+        velocity=Velocity;
+        canvas=aCanvas;
+        fire = new FilledOval( x, y, 30, 30, canvas);
+        fire.setColor(Color.RED);
+        start();
+    }
+    @Override public void run(){
+        while(moving==true && fire.getX()>=-50 ){
+            fire.move( -8-velocity*2, 0);
+             cx=fire.getX()+15;
+             cy=fire.getY()+15;
+            if(runner.getLeftX()<cx+15 && runner.getRightX()>cx-15 && 
+               Math.abs( runner.getCenterY()-cy ) <15+15){
+                   runner.removeFromCanvas();
+                   this.stop();
+            }
+            pause(33);
+        }
+    }
+    public double getRightX(){
+        return fire.getX()+30;
+    }
+    public void upSpeed(){
+        velocity+=0.1;
+    }
+    public double speed(){
+        return velocity;
+    }
+    public void Stop(){
+        moving=false;
+    }
+}
+
+import objectdraw.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class movestage extends ActiveObject {
+    private FilledRect[] inRect;
+    private FramedRect[] outRect;
+    private DrawingCanvas canvas;
+    private int num;
+    private int x=0;
+    private int DELAY_TIME=33;
+    private RandomIntGenerator die = new RandomIntGenerator( 0, 2);
+    private RandomIntGenerator kind = new RandomIntGenerator( 1, 3);
+    private RandomIntGenerator height= new RandomIntGenerator( 1, 2);
+    private character runner;
+    private barrierBlock block;
+    private Fire fire;
+    private int blocknum=1;
+    private int firenum=1;
+    private Timer time;
+    private Text text;
+    private double velocity=0;
+    private int t=1;
+      public movestage(character Runner ,DrawingCanvas aCanvas){
+       runner=Runner;
+       canvas=aCanvas;
+       inRect = new FilledRect[5000];
+       outRect = new FramedRect[5000];
+        for( int num=0; num<=4999; num++){
+            inRect[num] = new FilledRect( x, canvas.getHeight()-20, 40, 20, canvas);
+            outRect[num] = new FramedRect( x, canvas.getHeight()-20, 40, 20, canvas);
+            inRect[num].setColor(new Color(165,42,42));
+            outRect[num].setColor(Color.YELLOW);
+            x = x+40;
+       }
+       time = new Timer();
+       text=new Text("SPEED UP", canvas.getWidth()/2-20, 30, canvas);
+       text.hide();
+       start();
+    }
+    
+    @Override public void run(){//上のキー押したk下のキー押したかで場合分け
+      while(!runner.end() ){
+        
+         for( FilledRect nextFilledrect: inRect){
+                nextFilledrect.move(-2-velocity,0);
+         }
+         for( FramedRect nextFramedrect: outRect){
+                nextFramedrect.move(-2-velocity,0);
+         }
+         if(firenum==1){
+             fire=new Fire( runner, canvas.getWidth(), (canvas.getHeight()-50)-50*die.nextValue(), 0,canvas);
+             firenum++;
+            }
+         if( firenum==2 && canvas.getWidth()-fire.getRightX() > 300){//火球の頻度
+            fire = new Fire( runner, canvas.getWidth(), (canvas.getHeight()-50)-50*die.nextValue(), fire.speed(), canvas);
+         }
+         if(blocknum==1){
+            block=new barrierBlock(runner, canvas.getWidth(), (canvas.getHeight()-70)-50*(height.nextValue()-1), 
+                 kind.nextValue(), 0, canvas );
+            blocknum++;
+         }
+         if(blocknum==2 && block.getRightX()<canvas.getWidth()-30){
+            block=new barrierBlock(runner, canvas.getWidth(), (canvas.getHeight()-70)-50*(height.nextValue()-1), 
+                           kind.nextValue(), block.speed(), canvas ); 
+         }
+         
+         if(time.elapsedSeconds()>20*t){
+             velocity+=0.1;
+             fire.upSpeed();
+             block.upSpeed();
+             text.show();
+             t++;
+          }
+         if(time.elapsedSeconds()>20*(t-1)+1){
+             text.hide();
+            }
+         pause(DELAY_TIME);
+      }
+    } 
+    
+   
+}
+
+
+import objectdraw.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+public class Timer {
+
+    private double startTime; // Time when Timer started or reset
+
+    // Create timer, initializing startTime with current time
+    public Timer() {
+        startTime = System.currentTimeMillis();
+    }
+
+    // Return number of milliseconds since last reset
+    public double elapsedMilliseconds() {
+        return System.currentTimeMillis() - startTime;
+    }
+
+    // Return number of seconds since last reset
+    public double elapsedSeconds() {
+        return this.elapsedMilliseconds() / 1000;
+    }
+
+    // Reset StartTime
+    public void reset() {
+        startTime = System.currentTimeMillis();
+    }
+}
+
+
+import objectdraw.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+public class character extends ActiveObject{//背の高さは30
+   
+    
+    private FilledRect bike;
+    private FramedRect frame;
+    private FramedOval leftTire, rightTire;
+    // Instance variables
+    private FramedOval head;
+    private Line body,
+                 leftArm,
+                 rightArm,
+                 leftLeg,
+                 rightLeg;
+                 
+    private Text end;
+    private DrawingCanvas canvas;
+    private int DELAY_TIME=10;
+    private double basevelocity=2;
+    private int controll=1;
+    private boolean jumping=false;
+    private boolean moving = true;//途中でジャンプ止める;
+    private boolean stop = true;
+    private boolean onTheBlock=false;
+    private boolean finish=false;
+    private double jumpHeight;
+    private Timer time;
+    
+    public character(DrawingCanvas aCanvas){
+        time=new Timer();
+        canvas=aCanvas;
+        int HEAD_SIZE = 7;
+     
+        int LIMB_SIZE = 5;
+        int HEAD_START = canvas.getHeight()-50; // x and y coordinate of
+                                                // initial starting point
+
+        // Coordinates of body parts
+        int BODY_X = 30;
+        int NECK_Y = HEAD_START + HEAD_SIZE;
+        int ARMPIT_Y = HEAD_START + 2 * HEAD_SIZE;
+        int BODY_END = HEAD_START + 3 * HEAD_SIZE;
+        int FEET_Y = BODY_END + LIMB_SIZE;
+        int ARMS_Y = ARMPIT_Y - LIMB_SIZE;
+        int LEFT_X = BODY_X - LIMB_SIZE;
+        int RIGHT_X = BODY_X + LIMB_SIZE;
+        head=new FramedOval(30-7/2, HEAD_START,
+                              HEAD_SIZE, HEAD_SIZE, canvas);
+        body     = new Line(BODY_X, NECK_Y, BODY_X, BODY_END, canvas);
+        leftArm  = new Line(BODY_X, ARMPIT_Y, LEFT_X, ARMS_Y, canvas);
+        rightArm = new Line(BODY_X, ARMPIT_Y, RIGHT_X, ARMS_Y, canvas);
+        leftLeg  = new Line(BODY_X, BODY_END, LEFT_X, FEET_Y, canvas);
+        rightLeg = new Line(BODY_X, BODY_END, RIGHT_X, FEET_Y, canvas);
+        bike = new FilledRect( LEFT_X, FEET_Y, 10, 2, canvas);
+        bike.setColor(Color.RED);
+        frame=new FramedRect( LEFT_X, HEAD_START, 10, 30, canvas);
+        frame.setColor(Color.cyan);
+        leftTire = new FramedOval( LEFT_X, FEET_Y+2, 2, 2, canvas);
+        rightTire = new FramedOval( RIGHT_X-2, FEET_Y+2, 2, 2, canvas);
+        start();
+    }
+    @Override public void run(){
+        while(true){
+           if(jumping || controll==2 ){//jump操作でtrueに
+              
+              switch(controll){
+                  case 1:  
+                  jumpHeight=this.getUpY()-80;//ジャンプの高さ設定
+                  for(double num=0; frame.getY()+30>jumpHeight && moving; num+=0.1){
+                     this.move(0,-basevelocity*num); 
+                     pause(DELAY_TIME);
+                   }
+                   
+                  case 2 :    
+                  if(!onTheBlock){//乗ってるときにクリックして落ちないように条件を付けた
+                     for(double num=0;stop;num+=0.1){
+                          this.move(0,basevelocity*num);     
+                            if(canvas.getHeight()-20<frame.getY() + 30){
+                               stop=false;//forから抜ける、つまり落ちないようにする
+                               this.moveTo(canvas.getHeight()-20);//調整
+                            }
+                            pause(DELAY_TIME);
+                       }
+                    }
+                
+                  jumping=false;//もう飛ん出る状態じゃないよのサイン
+                  stop=true;//reset
+                  controll=1;//reset
+                  break;
+                  
+                  default:
+                    new Text ("error", 100, 100, canvas);
+                  break;
+              }
+             }
+           moving=true;//reset
+           pause(DELAY_TIME);
+        }
+    }
+    
+    public void move(double x, double y){
+        head.move( x, y);
+        body.move( x, y);
+        leftArm.move( x, y);
+        rightArm.move( x, y);
+        leftLeg.move( x, y);
+        rightLeg.move( x, y);
+        bike.move( x, y);
+        frame.move(x, y);
+        leftTire.move( x, y);
+        rightTire.move( x, y);
+    }
+    
+    public void moveTo( double y){//足がどこまで動くか指定する
+        this.move( 0, y-(frame.getY()+30) );
+    }
+    
+    public double getLeftX(){
+        return frame.getX();
+    }
+    public double getRightX(){
+        return frame.getX()+10;
+    }
+    public double getUpY(){
+        return frame.getY();
+    }
+    public double getDownY(){
+        return frame.getY()+30;
+    }
+    public double getCenterX(){
+        return frame.getX()+5;
+    }
+    public double getCenterY(){
+        return frame.getY()+15;
+    }
+    
+    public void removeFromCanvas(){
+        canvas.clear();
+        finish=true;
+        end=new Text( "GAME OVER   your time is "+ time.elapsedSeconds() + " seconds", 0, 0, canvas);
+        end.moveTo( (canvas.getWidth() - end.getWidth())/2, canvas.getHeight()/2);
+    }
+    public boolean end(){
+        return finish;
+    }
+    
+    public void Jump(){
+        jumping=true;
+    }
+    
+    public void stopJump(){
+        stop=false;
+    }
+    
+    public void reflect(){
+        moving=false;
+    }
+    
+    public void falling(){
+        controll=2;
+    }
+    public void On(){//乗ってるときに降りれなくする
+        onTheBlock=true;
+    }
+    public void notOn(){
+        onTheBlock=false;
+    }
+}
